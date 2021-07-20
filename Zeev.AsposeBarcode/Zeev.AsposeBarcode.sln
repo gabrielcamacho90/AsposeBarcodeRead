@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31424.327
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zeev.AsposeBarcode", "Zeev.AsposeBarcode\Zeev.AsposeBarcode.csproj", "{CA460296-6135-4CAF-899F-1460DEAEF29B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zeev.AsposeBarcode.Library", "Zeev.AsposeBarcode.Library\Zeev.AsposeBarcode.Library.csproj", "{E204844A-6E13-4297-B78B-9F09F6334170}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CA460296-6135-4CAF-899F-1460DEAEF29B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA460296-6135-4CAF-899F-1460DEAEF29B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA460296-6135-4CAF-899F-1460DEAEF29B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA460296-6135-4CAF-899F-1460DEAEF29B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E204844A-6E13-4297-B78B-9F09F6334170}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E204844A-6E13-4297-B78B-9F09F6334170}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E204844A-6E13-4297-B78B-9F09F6334170}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E204844A-6E13-4297-B78B-9F09F6334170}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {355C6EF6-EB13-407E-BD1F-136E815F123A}
+	EndGlobalSection
+EndGlobal
