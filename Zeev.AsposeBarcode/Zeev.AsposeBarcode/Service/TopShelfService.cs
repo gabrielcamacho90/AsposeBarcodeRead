@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using System.Timers;
 using Zeev.AsposeBarcode.Library;
 
@@ -21,7 +22,7 @@ namespace Zeev.AsposeBarcode.Service
             //timer.Elapsed += TimerElapsed;
         }
 
-          public void Start() {  }
+        public void Start() {  }
         public void Stop() {  }
 
         //Metodo chamado pela classe program, espera o carregamento do serviço.
@@ -29,8 +30,9 @@ namespace Zeev.AsposeBarcode.Service
         public void Init()
         {
             System.Threading.Thread.Sleep(10000);
-            Execute();
+            //Execute();
             //Start();
+            Task.Run(Execute);
         }
 
         //Quando o timer atinge o intervalo definido o evento TimerElapsed é acionado
@@ -40,15 +42,25 @@ namespace Zeev.AsposeBarcode.Service
             //antes que a execução do método execute esteja concluída
             //Após a execução o timer é iniciado novamente.
             //timer.Stop();
-            Execute();
+            
             //timer.Start();
         }
 
-        private void Execute()
+        private async Task Execute()
         {
-            IConfiguration configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appSettings.json").Build();
-            ReadBarcode readBarcode = new ReadBarcode(configuration);
-            readBarcode.ReadFilesByAspose();            
+            try
+            {
+                IConfiguration configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appSettings.json").Build();
+                ReadBarcode readBarcode = new ReadBarcode(configuration);
+                await readBarcode.ReadFilesByAspose();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Erro ao processar arquivos {ex.Message}");
+            }
+            
+            
+            
         }
     }
 }

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Zeev.AsposeBarcode.Library
 {
@@ -17,7 +18,7 @@ namespace Zeev.AsposeBarcode.Library
             _configuration = configuration;
         }
 
-        public void ReadFilesByAspose()
+        public async Task ReadFilesByAspose()
         {
             string pathLicenseAspose = _configuration["Files:PathLicenseAspose"];
             string pathFiles = _configuration["Files:PathDocs"];
@@ -116,12 +117,19 @@ namespace Zeev.AsposeBarcode.Library
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
+
+                    var pathFlError= Path.Combine(_configuration["Files:PathTemp"], $"{Path.GetRandomFileName()}.log");
+                    using (StreamWriter sw = new StreamWriter(pathFlError))
+                    {
+                        sw.WriteLine($"{ex.Message }\r\n {ex.StackTrace} \r\n");
+                        sw.Close();
+                    }
                 }
                 fileCount++;
             }
 
             Console.WriteLine("Finalizado");
-            Console.ReadLine();
+            Console.ReadLine();            
         }
 
         private Dictionary<string, string> GetIndexFields(string typesBarCode, string barCode)
