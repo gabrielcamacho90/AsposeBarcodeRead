@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
 using System.IO;
 using Zeev.AsposeBarcode.Library;
 
@@ -8,7 +8,10 @@ namespace Zeev.AsposeBarcode
     {
         static void Main(string[] args)
         {
-            ReadBarcode.Read();
+            IConfiguration configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appSettings.json").Build();
+
+            ReadBarcode readBarcode = new ReadBarcode(configuration);
+            readBarcode.ReadFilesByAspose();
         }
     }
 }
