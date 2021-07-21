@@ -28,8 +28,13 @@ namespace Zeev.AsposeBarcode.Library
             Aspose.OCR.License licenseOcr = new Aspose.OCR.License();
             licenseOcr.SetLicense(pathLicenseAspose);
 
-            foreach (var file in Directory.GetFiles(pathFiles, "*.tif", SearchOption.AllDirectories))
+            var allFiles = Directory.GetFiles(pathFiles, "*.tif", SearchOption.AllDirectories);
+
+            Console.WriteLine($"Total de arquivos coletados {allFiles.Length}");
+            int fileCount = 1;
+            foreach (var file in allFiles)
             {
+                Console.WriteLine($"Processando arquivo numero {fileCount}");
                 string barCode = string.Empty;
                 string resultOcr = string.Empty;
 
@@ -41,12 +46,14 @@ namespace Zeev.AsposeBarcode.Library
                     List<string> typesBarCode = new List<string>();
                     List<string> resultBarCode = new List<string>();
 
+                    Console.WriteLine($"Validando diretorio temporario");
                     // Valida se diretório existe
                     if (!Directory.Exists(Path.GetDirectoryName(pathTempImageOcr)))
                         Directory.CreateDirectory(Path.GetDirectoryName(pathTempImageOcr));
 
                     using (var bmpFile = new System.Drawing.Bitmap(file))
                     {
+                        Console.WriteLine($"Aplicando BCR");
                         using (BarCodeReader reader = new BarCodeReader(
                             bmpFile,
                             DecodeType.Code39Extended,
@@ -110,6 +117,7 @@ namespace Zeev.AsposeBarcode.Library
                 {
                     Console.WriteLine(ex.Message);
                 }
+                fileCount++;
             }
 
             Console.WriteLine("Finalizado");
