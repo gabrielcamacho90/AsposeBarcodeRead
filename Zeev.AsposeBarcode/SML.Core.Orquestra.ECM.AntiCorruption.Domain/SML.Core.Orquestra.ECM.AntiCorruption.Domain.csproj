@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>SML.Core.Orquestra.ECM.AntiCorruption.Domain</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="DTO\Common\" />
+    <Folder Include="DTO\ExecuteActionRequest\" />
+    <Folder Include="DTO\ExternalResponse\" />
+    <Folder Include="DTO\Interfaces\" />
+    <Folder Include="DTO\UploadFileRequest\" />
+    <Folder Include="DTO\Protocol\" />
+    <Folder Include="EntityWeb\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.35" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+    <PackageReference Include="System.ServiceModel.Primitives" Version="4.8.1" />
+  </ItemGroup>
+
+</Project>

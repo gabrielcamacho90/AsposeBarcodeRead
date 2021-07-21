@@ -1,6 +1,7 @@
 ﻿using Aspose.BarCode.BarCodeRecognition;
 using Aspose.OCR;
 using Microsoft.Extensions.Configuration;
+using SML.Core.Orquestra.ECM.AntiCorruption.Domain.DTO.Common;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
@@ -30,6 +31,8 @@ namespace Zeev.AsposeBarcode.Library
             foreach (var file in Directory.GetFiles(pathFiles, "*.tif", SearchOption.AllDirectories))
             {
                 string barCode = string.Empty;
+                string resultOcr = string.Empty;
+                string ocrFilePath = string.Empty;
 
                 try
                 {
@@ -67,7 +70,7 @@ namespace Zeev.AsposeBarcode.Library
                     // Recognize image
                     using (AsposeOcr api = new AsposeOcr())
                     {
-                        string resultOcr = api.RecognizeImage(pathTempImageOcr);
+                        resultOcr = api.RecognizeImage(pathTempImageOcr);
 
                         using (StreamWriter sw = new StreamWriter(pathTempResultOcr))
                         {
@@ -80,6 +83,16 @@ namespace Zeev.AsposeBarcode.Library
                     // Campos
                     var fieldsToIndex = GetIndexFields(String.Join(",", typesBarCode), String.Join(",", resultBarCode));
 
+                    var files = new Dictionary<string, string>();                                        
+                    files.Add(file, Path.GetFileName(file));
+
+                    if (!string.IsNullOrEmpty(resultOcr))
+                    {
+                        ocrFilePath = GetOCRFileText(resultOcr);
+                        files.Add(file, Path.GetFileName(ocrFilePath));
+                    }
+
+                    ZeevDocsIntegration.SendDocument(files, getPreFlowDoc(), getPosFlowDoc(), fieldsToIndex);
                     //ARQUIVOS PARA INDEXAR
                     //file
                     //pathTempResultOcr
@@ -103,8 +116,37 @@ namespace Zeev.AsposeBarcode.Library
             return new Dictionary<string, string>()
             {
                 {"IND_BARCODE", barCode},
-                {"TYPES_BARCODE", typesBarCode}
+                {"TIPOS_BARCODE", typesBarCode}
             };
+        }
+
+        private DocumentWorkflow getPreFlowDoc()
+        {
+            return new DocumentWorkflow
+            {
+                QueueName = "PREINDEXADO",
+                DoctypeId = 3,
+                SituationName = "EMPROCESSO",
+                PendencyName = "NENHUMA"
+            };
+        }
+
+        private DocumentWorkflow getPosFlowDoc()
+        {
+            return new DocumentWorkflow
+            {
+                QueueName = "FINALIZADO",                
+                SituationName = "PROCESSADO",
+                PendencyName = "NENHUMA"
+            };
+        }
+
+        private string GetOCRFileText(string fileContent)
+        {
+            var fileName = Path.GetTempFileName();
+            fileName = fileName.Substring(fileName.IndexOf(".") - 1) + ".txt";
+            File.WriteAllText(fileName, fileContent);
+            return fileName;
         }
     }
 }

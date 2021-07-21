@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>SML.Core.Orquestra.ECM.AntiCorruption.Application</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Service\ExternalIntegration.cs" />
+    <Compile Remove="Service\ExternalIntegrationApplication.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SML.PRJ.Libary" Version="1.0.0" />
+    <PackageReference Include="System.ServiceModel.Primitives" Version="4.8.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SML.Core.Orquestra.ECM.AntiCorruption.Domain\SML.Core.Orquestra.ECM.AntiCorruption.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
