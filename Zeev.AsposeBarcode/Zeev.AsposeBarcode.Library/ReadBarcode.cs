@@ -32,7 +32,6 @@ namespace Zeev.AsposeBarcode.Library
             {
                 string barCode = string.Empty;
                 string resultOcr = string.Empty;
-                string ocrFilePath = string.Empty;
 
                 try
                 {
@@ -72,30 +71,36 @@ namespace Zeev.AsposeBarcode.Library
                     {
                         resultOcr = api.RecognizeImage(pathTempImageOcr);
 
-                        using (StreamWriter sw = new StreamWriter(pathTempResultOcr))
+                        if (!string.IsNullOrEmpty(resultOcr))
                         {
-                            sw.WriteLine(resultOcr);
-                            sw.Close();
+                            using (StreamWriter sw = new StreamWriter(pathTempResultOcr))
+                            {
+                                sw.WriteLine(resultOcr);
+                                sw.Close();
+                            }
                         }
                     }
 
-                    //TODO: Indexar ECM
-                    // Campos
+                    // Indexar ECM - Campos
                     var fieldsToIndex = GetIndexFields(String.Join(",", typesBarCode), String.Join(",", resultBarCode));
 
-                    var files = new Dictionary<string, string>();                                        
-                    files.Add(file, Path.GetFileName(file));
+                    // Monta lista com arquivos
+                    Byte[] bytesFile = File.ReadAllBytes(file);
+                    string fileOriginal = Convert.ToBase64String(bytesFile);
 
-                    if (!string.IsNullOrEmpty(resultOcr))
+                    var files = new Dictionary<string, string>();
+                    files.Add(fileName, fileOriginal);
+
+                    if (File.Exists(pathTempResultOcr))
                     {
-                        ocrFilePath = GetOCRFileText(resultOcr);
-                        files.Add(file, Path.GetFileName(ocrFilePath));
+                        Byte[] bytesFileOcr = File.ReadAllBytes(pathTempResultOcr);
+                        string fileOcrBase64 = Convert.ToBase64String(bytesFileOcr);
+
+                        files.Add(Path.GetFileName(pathTempResultOcr), fileOcrBase64);
                     }
 
+                    // Indexa Arquivos
                     ZeevDocsIntegration.SendDocument(files, getPreFlowDoc(), getPosFlowDoc(), fieldsToIndex);
-                    //ARQUIVOS PARA INDEXAR
-                    //file
-                    //pathTempResultOcr
 
                     // Deleta arquivos criado em TEMP
                     File.Delete(pathTempImageOcr);
@@ -124,10 +129,10 @@ namespace Zeev.AsposeBarcode.Library
         {
             return new DocumentWorkflow
             {
-                QueueName = "PREINDEXADO",
-                DoctypeId = 3,
-                SituationName = "EMPROCESSO",
-                PendencyName = "NENHUMA"
+                QueueId = 1,
+                DoctypeId = 1,
+                SituationId = 1,
+                PendencyId = 1
             };
         }
 
@@ -135,18 +140,10 @@ namespace Zeev.AsposeBarcode.Library
         {
             return new DocumentWorkflow
             {
-                QueueName = "FINALIZADO",                
-                SituationName = "PROCESSADO",
-                PendencyName = "NENHUMA"
+                QueueId = 3,
+                SituationId = 2,
+                PendencyId = 1
             };
-        }
-
-        private string GetOCRFileText(string fileContent)
-        {
-            var fileName = Path.GetTempFileName();
-            fileName = fileName.Substring(fileName.IndexOf(".") - 1) + ".txt";
-            File.WriteAllText(fileName, fileContent);
-            return fileName;
         }
     }
 }
