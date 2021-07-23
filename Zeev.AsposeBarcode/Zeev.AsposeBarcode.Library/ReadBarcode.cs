@@ -220,6 +220,7 @@ namespace Zeev.AsposeBarcode.Library
                                 }
 
                                 resultOcr = api.RecognizeImage(pathTempImageOcr);
+                                Task.Run(ClearRowFiles);
 
                                 if (!string.IsNullOrEmpty(resultOcr))
                                 {
@@ -576,6 +577,12 @@ namespace Zeev.AsposeBarcode.Library
             }
 
             return result;
+        }
+
+        private async Task ClearRowFiles()
+        {
+            Directory.GetFiles(pathFiles, "*.png", SearchOption.TopDirectoryOnly)
+                .ToList().AsParallel().ForAll(f => File.Delete(f));
         }
         #endregion
 
