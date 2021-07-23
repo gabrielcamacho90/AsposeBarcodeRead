@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Xml.Linq;
 using Zeev.AsposeBarcode.Library;
 
 namespace Zeev.AsposeBarcode.Service
@@ -13,6 +14,7 @@ namespace Zeev.AsposeBarcode.Service
     {
         //readonly Timer timer;
         //readonly int Interval;
+
 
         //Construtor da classe, aqui setamos o intervalo de cada ciclo e iniciamos o timer
         public TopShelfService()
@@ -52,7 +54,9 @@ namespace Zeev.AsposeBarcode.Service
             {
                 IConfiguration configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appSettings.json").Build();
                 ReadBarcode readBarcode = new ReadBarcode(configuration);
-                await readBarcode.ReadFilesByAspose();
+                //await readBarcode.ReadFilesByAspose();
+                await readBarcode.ReadBarcodeManager();
+
             }
             catch(Exception ex)
             {
@@ -62,5 +66,7 @@ namespace Zeev.AsposeBarcode.Service
             
             
         }
+    
+
     }
 }

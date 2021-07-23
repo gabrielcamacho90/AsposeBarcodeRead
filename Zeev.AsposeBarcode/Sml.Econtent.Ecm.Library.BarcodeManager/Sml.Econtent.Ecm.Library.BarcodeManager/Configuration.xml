@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <barcodes>
+    <barcode id="1" name="Code128"></barcode>
+    <barcode id="2" name="Code39"></barcode>
+    <barcode id="3" name="EAN13"></barcode>
+    <barcode id="4" name="EAN8"></barcode>
+    <barcode id="5" name="Interleaved2of5"></barcode>
+    <barcode id="6" name="RSS14"></barcode>
+    <barcode id="7" name="RSSExpanded"></barcode>
+    <barcode id="8" name="UPCA"></barcode>
+    <barcode id="9" name="UPCE"></barcode>
+    <barcode id="10" name="Codabar"></barcode>
+    <barcode id="11" name="Aztec"></barcode>
+    <barcode id="12" name="DataMatrix"></barcode>
+    <barcode id="13" name="MaxiCode"></barcode>
+    <barcode id="14" name="PDF417"></barcode>
+    <barcode id="15" name="QRCode"></barcode>
+  </barcodes>
+  <frames choosenFrames="A,B,C,D"></frames>
+  <rules>
+    <rule order="1" searchType="StartWith" argument="CONTCV-">
+      <fields>
+        <field name="DOCTYPE_ID" value="1" description="Contrato de Compra e Venda"></field>
+      </fields>
+    </rule>
+  </rules>
+</configuration>

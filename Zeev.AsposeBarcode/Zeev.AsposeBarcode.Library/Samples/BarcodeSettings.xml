@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<barcodeSetting factor="10" direction="topdown" jumpStart="1" jumpEnd="5" firstStop="1">
+  <barcodes>
+    <barcode name="Code128"/>
+    <barcode name="Code39"/>
+    <barcode name="Interleaved2of5"/>
+  </barcodes>
+  <frames choosenFrames="Frame1,Frame2"/>
+  <rules/>
+</barcodeSetting>

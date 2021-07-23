@@ -16,4 +16,10 @@
     <ProjectReference Include="..\SML.Core.Orquestra.ECM.AntiCorruption.Domain\SML.Core.Orquestra.ECM.AntiCorruption.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Samples\BarcodeSettings.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
