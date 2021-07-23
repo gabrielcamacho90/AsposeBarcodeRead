@@ -26,7 +26,7 @@ namespace Zeev.AsposeBarcode.Library
         private List<string> processedFiles;
 
         public ReadBarcode(IConfiguration configuration)
-        {                      
+        {
             _configuration = configuration;
 #if DEBUG
             pathLicenseAspose = Path.Combine(Directory.GetCurrentDirectory(), "Aspose.Total.lic");
@@ -44,7 +44,7 @@ namespace Zeev.AsposeBarcode.Library
 
         #region Implementação inicial
         public async Task ReadFilesByAspose()
-        {            
+        {
             var allFiles = Directory.GetFiles(pathFiles, "*.tif", SearchOption.AllDirectories);
 
             Console.WriteLine($"Total de arquivos coletados {allFiles.Length}");
@@ -134,7 +134,7 @@ namespace Zeev.AsposeBarcode.Library
                 {
                     Console.WriteLine(ex.Message);
 
-                    var pathFlError= Path.Combine(_configuration["Files:PathTemp"], $"{Path.GetRandomFileName()}.log");
+                    var pathFlError = Path.Combine(_configuration["Files:PathTemp"], $"{Path.GetRandomFileName()}.log");
                     using (StreamWriter sw = new StreamWriter(pathFlError))
                     {
                         sw.WriteLine($"{ex.Message }\r\n {ex.StackTrace} \r\n");
@@ -145,7 +145,7 @@ namespace Zeev.AsposeBarcode.Library
             }
 
             Console.WriteLine("Finalizado");
-            Console.ReadLine();            
+            Console.ReadLine();
         }
 
         private Dictionary<string, string> GetIndexFields(string typesBarCode, string barCode)
@@ -183,7 +183,7 @@ namespace Zeev.AsposeBarcode.Library
         {
             Console.WriteLine("Inicio da leitura com processo BarcodeManager");
 
-            string xmlSample = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(),"BarcodeSettings.xml"));
+            string xmlSample = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "BarcodeSettings.xml"));
             SetupBarcode(xmlSample);
 
             var allFiles = Directory.GetFiles(pathFiles, "*.tif", SearchOption.AllDirectories).ToList();
@@ -197,77 +197,91 @@ namespace Zeev.AsposeBarcode.Library
                 allFiles.Take(100).AsParallel()
                     .ToList().ForEach(file =>
                     {
-                        string resultOcr = string.Empty;
-                        Console.WriteLine($"Processando arquivo {fileCount} do total");
-                        string fileName = Path.GetFileName(file);
-                        string pathTempImageOcr = Path.Combine(_configuration["Files:PathTemp"], $"{Path.GetRandomFileName()}.bmp");
-                        string pathTempResultOcr = Path.Combine(_configuration["Files:PathTemp"], $"{Path.GetRandomFileName()}.txt");
-                        var typesBarCode = new List<string>();
+                        try
+                        {
+                            string resultOcr = string.Empty;
+                            Console.WriteLine($"Processando arquivo {fileCount} do total");
+                            string fileName = Path.GetFileName(file);
+                            string pathTempImageOcr = Path.Combine(_configuration["Files:PathTemp"], $"{Path.GetRandomFileName()}.bmp");
+                            string pathTempResultOcr = Path.Combine(_configuration["Files:PathTemp"], $"{Path.GetRandomFileName()}.txt");
+                            var typesBarCode = new List<string>();
 
-                        Console.WriteLine($"Extraindo código de barras");
-                        var resultBarCode = FindBarcode(file, out typesBarCode);
+                            Console.WriteLine($"Extraindo código de barras");
+                            var resultBarCode = FindBarcode(file, out typesBarCode);
 
-                        Console.WriteLine("Processando OCR");
-                        // Recognize image
-                        using (AsposeOcr api = new AsposeOcr() )
-                        {                            
-                            using (var bitmap = new Bitmap(file))
+                            Console.WriteLine("Processando OCR");
+                            // Recognize image
+                            using (AsposeOcr api = new AsposeOcr())
                             {
-                                Console.WriteLine("Salvando versão em bitmap para extração");
-                                bitmap.Save(pathTempImageOcr, ImageFormat.Bmp);
-                            }
-                                
+                                using (var bitmap = new Bitmap(file))
+                                {
+                                    Console.WriteLine("Salvando versão em bitmap para extração");
+                                    bitmap.Save(pathTempImageOcr, ImageFormat.Bmp);
+                                }
 
                                 resultOcr = api.RecognizeImage(pathTempImageOcr);
 
-                            if (!string.IsNullOrEmpty(resultOcr))
-                            {
-                                using (StreamWriter sw = new StreamWriter(pathTempResultOcr))
+                                if (!string.IsNullOrEmpty(resultOcr))
                                 {
-                                    sw.WriteLine(resultOcr);
-                                    sw.Close();
+                                    using (StreamWriter sw = new StreamWriter(pathTempResultOcr))
+                                    {
+                                        sw.WriteLine(resultOcr);
+                                        sw.Close();
+                                    }
                                 }
                             }
+
+                            // Indexar ECM - Campos
+                            var fieldsToIndex = GetIndexFields(String.Join(",", typesBarCode), String.Join(",", resultBarCode));
+
+                            // Monta lista com arquivos
+                            Byte[] bytesFile = File.ReadAllBytes(file);
+                            string fileOriginal = Convert.ToBase64String(bytesFile);
+
+                            var files = new Dictionary<string, string>();
+                            files.Add(fileName, fileOriginal);
+
+                            if (File.Exists(pathTempResultOcr))
+                            {
+                                Byte[] bytesFileOcr = File.ReadAllBytes(pathTempResultOcr);
+                                string fileOcrBase64 = Convert.ToBase64String(bytesFileOcr);
+
+                                files.Add(Path.GetFileName(pathTempResultOcr), fileOcrBase64);
+                            }
+                            Console.WriteLine($"Enviando arquivos para o ECM");
+                            // Indexa Arquivos
+                            ZeevDocsIntegration.SendDocument(files, getPreFlowDoc(), getPosFlowDoc(), fieldsToIndex);
+
+                            Console.WriteLine("Apagando temporarios");
+                            // Deleta arquivos criado em TEMP
+                            File.Delete(pathTempImageOcr);
+                            File.Delete(pathTempResultOcr);
+                            fileCount++;
+                            processedFiles.Add(file);
+
+                            Console.WriteLine($"Fim do processamento do arquivo {fileCount}");
                         }
-
-                        // Indexar ECM - Campos
-                        var fieldsToIndex = GetIndexFields(String.Join(",", typesBarCode), String.Join(",", resultBarCode));
-
-                        // Monta lista com arquivos
-                        Byte[] bytesFile = File.ReadAllBytes(file);
-                        string fileOriginal = Convert.ToBase64String(bytesFile);
-
-                        var files = new Dictionary<string, string>();
-                        files.Add(fileName, fileOriginal);
-
-                        if (File.Exists(pathTempResultOcr))
+                        catch (Exception ex)
                         {
-                            Byte[] bytesFileOcr = File.ReadAllBytes(pathTempResultOcr);
-                            string fileOcrBase64 = Convert.ToBase64String(bytesFileOcr);
+                            Console.WriteLine(ex.Message);
 
-                            files.Add(Path.GetFileName(pathTempResultOcr), fileOcrBase64);
+                            var pathFlError = Path.Combine(_configuration["Files:PathTemp"], $"{Path.GetRandomFileName()}.log");
+                            using (StreamWriter sw = new StreamWriter(pathFlError))
+                            {
+                                sw.WriteLine($"{ex.Message }\r\n {ex.StackTrace} \r\n");
+                                sw.Close();
+                            }
                         }
-                        Console.WriteLine($"Enviando arquivos para o ECM");
-                        // Indexa Arquivos
-                        ZeevDocsIntegration.SendDocument(files, getPreFlowDoc(), getPosFlowDoc(), fieldsToIndex);
-
-                        Console.WriteLine("Apagando temporarios");
-                        // Deleta arquivos criado em TEMP
-                        File.Delete(pathTempImageOcr);
-                        File.Delete(pathTempResultOcr);
-                        fileCount++;
-                        processedFiles.Add(file);
-
-                        Console.WriteLine($"Fim do processamento do arquivo {fileCount}");
                     });
 
-                processedFiles.ForEach(p => {
+                processedFiles.ForEach(p =>
+                {
                     allFiles.Remove(p);
                 });
 
                 processedFiles.Clear();
                 Console.WriteLine($"Faltam {allFiles.Count} arquivos para processar");
-            } 
+            }
         }
 
         private void SetupBarcode(string xmlBarcodeTypes)
@@ -459,7 +473,7 @@ namespace Zeev.AsposeBarcode.Library
 
             List<string> resultTypes = new List<string>();
             string result = string.Empty;
-            string barcodes=string.Empty;
+            string barcodes = string.Empty;
             Bitmap toDecoder = null;
             try
             {
@@ -508,13 +522,13 @@ namespace Zeev.AsposeBarcode.Library
                     Rectangle frame = new Rectangle(new Point(toDecoder.Width / 2, 0), halfW);
                     toDecoder = toDecoder.Clone(frame, toDecoder.PixelFormat);
                 }
-                BarCodeReader barCodeDecoder = new BarCodeReader(toDecoder, possibleFormats.ToArray());                
-                BarCodeResult[] decodedBarcodes = barCodeDecoder.ReadBarCodes();                    
+                BarCodeReader barCodeDecoder = new BarCodeReader(toDecoder, possibleFormats.ToArray());
+                BarCodeResult[] decodedBarcodes = barCodeDecoder.ReadBarCodes();
 
                 if (decodedBarcodes != null)
                 {
                     //barcodes = new XElement("barcodes");                    
-                   
+
                     List<BarCodeResult> rulesApplieds = new List<BarCodeResult>();
                     if (Rules != null)
                     {
@@ -562,7 +576,7 @@ namespace Zeev.AsposeBarcode.Library
             }
 
             return result;
-        }       
+        }
         #endregion
 
     }
